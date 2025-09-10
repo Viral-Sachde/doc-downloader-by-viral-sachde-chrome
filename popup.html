@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,9 +8,10 @@
     <link rel="stylesheet" href="popup.css">
     <link rel="icon" type="image/png" href="icons/favicon.png">
 </head>
+
 <body>
 
-    
+
     <div class="container">
         <div class="header">
             <h1>🔗 Doc Dowloader By Viral Sachde </h1>
@@ -20,7 +22,7 @@
             <!-- Basic Settings -->
             <div class="section">
                 <h3>Basic Settings</h3>
-                
+
                 <div class="form-group">
                     <label for="innerContent">
                         <input type="checkbox" id="innerContent" checked>
@@ -34,47 +36,53 @@
                         Convert relative links to absolute
                     </label>
                 </div>
+
+                 <div class="form-group">
+                    <label for="ignoreHeaderFooterFiles">
+                        <input type="checkbox" id="ignoreHeaderFooterFiles" checked>
+                        Ignore Files from Header and Footer
+                    </label>
+                </div> 
             </div>
 
             <!-- Media Constants -->
             <div class="section">
                 <h3>Media Constants</h3>
-                
+
                 <div class="form-group">
                     <label for="mediaPrefixXlsx">Excel Media Prefix:</label>
-                    <input type="text" id="mediaPrefixXlsx" 
-                           value="media | /Sitecore/media files/Y/SiteName/Universal/investors/result-reports-presentation/example.pdf"
-                           placeholder="Enter Excel media prefix">
+                    <input type="text" id="mediaPrefixXlsx"
+                        value="media | /Sitecore/media files/Y/SiteName/Universal/investors/result-reports-presentation/example.pdf"
+                        placeholder="Enter Excel media prefix">
                 </div>
 
                 <div class="form-group">
                     <label for="mediaPrefixHtml">HTML Media Prefix:</label>
-                    <input type="text" id="mediaPrefixHtml" 
-                           value="/~/media/Files/Y/SiteName/Universal/investors/result-reports-presentation/example.pdf"
-                           placeholder="Enter HTML media prefix">
+                    <input type="text" id="mediaPrefixHtml"
+                        value="/~/media/Files/Y/SiteName/Universal/investors/result-reports-presentation/example.pdf"
+                        placeholder="Enter HTML media prefix">
                 </div>
             </div>
 
             <!-- File Extensions -->
             <div class="section">
                 <h3>File Extensions</h3>
-                
+
                 <div class="form-group">
                     <label for="fileExtensions">Document Extensions (comma-separated):</label>
-                    <input type="text" id="fileExtensions" 
-                           value="pdf,docx,doc,xlsx,xls,pptx,ppt,txt,csv,rtf,odt"
-                           placeholder="pdf,docx,xlsx,...">
+                    <input type="text" id="fileExtensions" value="pdf,docx,doc,xlsx,xls,pptx,ppt,txt,csv,rtf,odt"
+                        placeholder="pdf,docx,xlsx,...">
                 </div>
             </div>
 
             <!-- Link Selectors -->
             <div class="section">
                 <h3>Advanced Settings</h3>
-                
+
                 <div class="form-group">
                     <label for="linkSelectors">Link Selectors (comma-separated):</label>
-                    <textarea id="linkSelectors" rows="3" 
-                              placeholder="a[href], link[href], a[data-href]">a[href],link[href],a[data-href],a[data-download]</textarea>
+                    <textarea id="linkSelectors" rows="3"
+                        placeholder="a[href], link[href], a[data-href]">a[href],link[href],a[data-href],a[data-download]</textarea>
                 </div>
             </div>
 
@@ -112,4 +120,5 @@
 
     <script src="popup.js"></script>
 </body>
+
 </html>

@@ -81,6 +81,7 @@ class BackgroundService {
       const defaultSettings = {
         innerContent: true,
         makeAbsolute: true,
+ignoreHeaderFooterFiles:true,
         mediaPrefixXlsx: 'media | /Sitecore/media files/Y/SiteName/Universal/investors/result-reports-presentation/example.pdf"',
         mediaPrefixHtml: '/~/media/Files/Y/SiteName/Universal/investors/result-reports-presentation/example.pdf',
         fileExtensions: 'pdf,docx,doc,xlsx,xls,pptx,ppt,txt,csv,rtf,odt',
