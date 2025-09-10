@@ -1,0 +1,231 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    width: 420px;
+    max-height: 600px;
+    overflow-y: auto;
+    background: white;
+        color: #333;
+  }
+
+  .container {
+    background: white;
+    border-radius: 12px;
+    margin: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+  
+  .header {
+    background-image: linear-gradient(90deg, #132649 -2.37%, #1E355E 101.12%);
+
+    color: white;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+  
+  .subtitle {
+    font-size: 12px;
+    opacity: 0.9;
+  }
+  
+  .form {
+    padding: 20px;
+  }
+  
+  .section {
+    margin-bottom: 20px;
+  }
+  
+  .section h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 12px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  
+  .form-group {
+    margin-bottom: 12px;
+  }
+  
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: #4a5568;
+    margin-bottom: 4px;
+  }
+  
+  .form-group label input[type="checkbox"] {
+    margin-right: 8px;
+  }
+  
+  .form-group input[type="text"],
+  .form-group textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    resize: vertical;
+  }
+  
+  .form-group input[type="text"]:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #4facfe;
+    box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+  }
+  
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  
+  .btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+  
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .btn-primary {
+    background-image: linear-gradient(90deg, #132649 -2.37%, #1E355E 101.12%);
+    color: white;
+  }
+  
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+  }
+  
+  .btn-secondary {
+    background: #f7fafc;
+    color: #2d3748;
+    border: 2px solid #e2e8f0;
+  }
+  
+  .btn-secondary:hover:not(:disabled) {
+    background: #edf2f7;
+    border-color: #cbd5e0;
+  }
+  
+  .results {
+    background: #f8f9fa;
+    margin: 0 20px 20px 20px;
+    border-radius: 6px;
+    padding: 15px;
+    border-left: 4px solid #4facfe;
+  }
+  
+  .summary {
+    background: white;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    font-size: 12px;
+  }
+  
+  .links-list {
+    max-height: 200px;
+    overflow-y: auto;
+    background: white;
+    border-radius: 4px;
+    padding: 8px;
+  }
+  
+  .link-item {
+    padding: 8px;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 11px;
+  }
+  
+  .link-item:last-child {
+    border-bottom: none;
+  }
+  
+  .link-url {
+    font-weight: 500;
+    color: #2b6cb0;
+    word-break: break-all;
+    margin-bottom: 2px;
+  }
+  
+  .link-title {
+    color: #4a5568;
+    font-style: italic;
+  }
+  
+  .status {
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e2e8f0;
+    border-top: 2px solid #4facfe;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .hidden {
+    display: none !important;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
