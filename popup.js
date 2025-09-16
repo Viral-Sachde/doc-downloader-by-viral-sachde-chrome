@@ -130,8 +130,8 @@ class DocumentExtractor {
       });
 
       if (response && response.success) {
-        this.extractedLinks = response.links;
-        this.displayResults();
+        this.extractedLinks = this.handleDuplicateFilenames(response.links);
+                this.displayResults();
       } else {
         throw new Error(response?.error || 'Failed to extract links');
       }
@@ -182,20 +182,24 @@ class DocumentExtractor {
 
   async downloadFiles() {
     if (this.extractedLinks.length === 0) return;
-
+  
     try {
       this.showStatus('Starting downloads...');
-
+  
+      // Pre-process links to handle duplicates
+      const processedLinks = this.handleDuplicateFilenames([...this.extractedLinks]);
+  
       let downloaded = 0;
-      const total = this.extractedLinks.length;
-
-      for (const link of this.extractedLinks) {
+      const total = processedLinks.length;
+  
+      for (const link of processedLinks) {
         try {
-          this.showStatus(`Downloading ${downloaded + 1}/${total}: ${link.filename}`);
-
+          this.showStatus(`Downloading ${downloaded + 1}/${total}: ${link.filenameWithExt}`);
+  
           await chrome.downloads.download({
             url: link.url,
-            filename: link.filenameWithExt || link.filename || undefined,
+            filename: link.filenameWithExt,
+            conflictAction: 'uniquify', // This makes Chrome auto-rename conflicts
             saveAs: false
           });
           downloaded++;
@@ -203,16 +207,46 @@ class DocumentExtractor {
           console.error(`Failed to download ${link.url}:`, error);
         }
       }
-
+  
       this.showStatus(`Download complete! ${downloaded}/${total} files downloaded.`);
       setTimeout(() => this.hideStatus(), 3000);
-
+  
     } catch (error) {
       console.error('Error downloading files:', error);
       this.showStatus(`Download error: ${error.message}`);
       setTimeout(() => this.hideStatus(), 3000);
     }
   }
+  handleDuplicateFilenames(links) {
+    const filenameMap = new Map();
+    
+    links.forEach(link => {
+      const baseFilename = link.filename;
+      if (!filenameMap.has(baseFilename)) {
+        filenameMap.set(baseFilename, []);
+      }
+      filenameMap.get(baseFilename).push(link);
+    });
+    
+    filenameMap.forEach((linkGroup, baseFilename) => {
+      if (linkGroup.length > 1) {
+        linkGroup.forEach((link, index) => {
+          if (index > 0) {
+            link.filename = `${baseFilename}-${index}`;
+          } else {
+            link.filename = baseFilename;
+          }
+          link.filenameWithExt = `${link.filename}.${link.extension}`;
+        });
+      } else {
+        // single file, just ensure filenameWithExt is correct
+        linkGroup[0].filenameWithExt = `${linkGroup[0].filename}.${linkGroup[0].extension}`;
+      }
+    });
+    
+    return links;
+  }
+  
 
   async exportData() {
     if (this.extractedLinks.length === 0) return;

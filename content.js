@@ -19,6 +19,37 @@ class ContentExtractor {
     });
   }
 
+  handleDuplicateFilenames(links) {
+    const filenameMap = new Map();
+    
+    // First pass: count occurrences of each filename
+    links.forEach(link => {
+      const baseFilename = link.filename;
+      if (!filenameMap.has(baseFilename)) {
+        filenameMap.set(baseFilename, []);
+      }
+      filenameMap.get(baseFilename).push(link);
+    });
+    
+    // Second pass: rename duplicates
+    filenameMap.forEach((linkGroup, baseFilename) => {
+      if (linkGroup.length > 1) {
+        linkGroup.forEach((link, index) => {
+          if (index === 0) {
+            // First occurrence keeps original name
+            return;
+          } else {
+            // Add suffix to duplicates
+            link.filename = `${baseFilename}-${index}`;
+            link.filenameWithExt = `${baseFilename}-${index}.${link.extension}`;
+          }
+        });
+      }
+    });
+    
+    return links;
+  }
+  
   async extractDocumentLinks(settings, pageUrl) {
     try {
       const links = new Map();
@@ -142,10 +173,10 @@ const elements = Array.from(document.querySelectorAll(selector))
       });
 
       const linkArray = Array.from(links.values());
-      
+      const deduplicatedLinks = this.handleDuplicateFilenames(linkArray);
       return {
         success: true,
-        links: linkArray,
+        links: deduplicatedLinks,
         pageUrl: pageUrl,
         timestamp: new Date().toISOString()
       };
