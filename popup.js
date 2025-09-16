@@ -241,7 +241,7 @@ class DocumentExtractor {
   createExcelData(settings) {
     const headers = [
       'original_url', 'title', 'slugified_filename_with_ext', 'slugified_filename_no_ext', 'media_constant',
-      'file_size_human', 'tooltip', 'extension', 'status'
+      'media_constant_no_ext', 'link_text', 'file_size_human', 'tooltip', 'extension', 'status'
     ];
     
     const rows = this.extractedLinks.map(link => [
@@ -250,11 +250,14 @@ class DocumentExtractor {
       link.filenameWithExt || '',
       link.filename || '',
       `${settings.mediaPrefixXlsx}/${link.filenameWithExt || ''}`,
+      `${settings.mediaPrefixXlsx}/${link.filename || ''}`,  // media url without extension
+      link.title || '', // link text
       this.humanFileSize(link.estimatedSize),
       link.tooltip || '',
       link.extension || '',
       'extracted'
     ]);
+    
 
     return [headers, ...rows].map(row => row.join(',')).join('\n');
   }

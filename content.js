@@ -30,9 +30,67 @@ class ContentExtractor {
       // Process each selector type
       linkSelectors.forEach(selector => {
         try {
-          const elements = document.querySelectorAll(selector);
+       // Enhanced bad zone detection
+const badZoneSelectors = [
+  'header', 'footer', 'nav', 'aside',
+  '[role="banner"]', '[role="contentinfo"]', '[role="navigation"]', '[role="complementary"]',
+  '.site-header', '.site-footer', '.global-header', '.global-footer',
+  '.header', '.footer', '.navigation', '.nav', '.navbar', '.nav-bar',
+  '.site-nav', '.main-nav', '.primary-nav', '.secondary-nav',
+  '.breadcrumb', '.breadcrumbs', '.page-header', '.page-footer',
+  '.top-bar', '.bottom-bar', '.masthead', '.site-info',
+  '#header', '#footer', '#navigation', '#nav', '#navbar',
+  '#site-header', '#site-footer', '#main-nav', '#primary-nav',  
+  // Corporate website specific
+  '.footer', '.site-footer', '.page-footer', '.main-footer',
+  '.footer-section', '.footer-content', '.footer-wrapper',
+  '.footer-links', '.footer-nav', '.footer-menu',
+  
+  // More specific patterns
+  '[class*="footer"]', '[id*="footer"]',
+  '.legal-links', '.corporate-links', '.utility-links',
+];
+
+const badZones = document.querySelectorAll(badZoneSelectors.join(', '));
+
+const isInBadZone = (element) => {
+  // Check if element itself matches bad zone selectors
+  for (const selector of badZoneSelectors) {
+    try {
+      if (element.matches(selector)) return true;
+    } catch (e) {}
+  }
+  
+  // Check if ANY ancestor (at any depth) is a bad zone
+  let currentElement = element;
+  while (currentElement && currentElement !== document.body) {
+    // Check against all bad zone elements
+    for (const zone of badZones) {
+      if (zone === currentElement) {
+        return true;
+      }
+    }
+    
+    // Also check if current ancestor matches bad zone selectors
+    for (const selector of badZoneSelectors) {
+      try {
+        if (currentElement.matches(selector)) {
+          return true;
+        }
+      } catch (e) {}
+    }
+    
+    currentElement = currentElement.parentElement;
+  }
+  
+  return false;
+};
+          
+const elements = Array.from(document.querySelectorAll(selector))
+.filter(element => !isInBadZone(element));
           
           elements.forEach(element => {
+          
             const href = element.getAttribute('href') || 
                         element.getAttribute('data-href') || 
                         element.getAttribute('data-download');
@@ -53,12 +111,14 @@ class ContentExtractor {
               let title = '';
               
               if (innerContent) {
-                title = this.extractElementText(element) ||
-                       element.getAttribute('title') ||
-                       element.getAttribute('aria-label') ||
-                       element.getAttribute('data-title') ||
-                       '';
+                title = (element.innerText || '').trim() ||
+                        this.extractElementText(element) ||
+                        element.getAttribute('title') ||
+                        element.getAttribute('aria-label') ||
+                        element.getAttribute('data-title') ||
+                        '';
               }
+              
 
               // Extract additional metadata
               const metadata = this.extractLinkMetadata(element, finalUrl);
@@ -145,6 +205,8 @@ class ContentExtractor {
   }
 
   extractFilename(pathname, element) {
+
+    
     // Try to get filename from various sources
     const contentDisposition = element.getAttribute('data-filename');
     if (contentDisposition) return contentDisposition;
@@ -158,8 +220,8 @@ class ContentExtractor {
     }
 
     // Generate from element text if available
-    const text = this.extractElementText(element);
-    if (text && text.length > 0 && text.length < 100) {
+    const text = (element.innerText || '').trim();
+    if (text) {
       const ext = this.extractExtension(pathname);
       return this.slugifyFilename(`${text}${ext ? '.' + ext : ''}`);
     }
