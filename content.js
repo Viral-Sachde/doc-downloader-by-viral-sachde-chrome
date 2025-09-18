@@ -11,48 +11,15 @@ class ContentExtractor {
           .then(result => sendResponse(result))
           .catch(error => sendResponse({ success: false, error: error.message }));
         
-
-          
         // Return true to indicate we'll send a response asynchronously
         return true;
       }
     });
   }
 
-  handleDuplicateFilenames(links) {
-    const filenameMap = new Map();
-    
-    // First pass: count occurrences of each filename
-    links.forEach(link => {
-      const baseFilename = link.filename;
-      if (!filenameMap.has(baseFilename)) {
-        filenameMap.set(baseFilename, []);
-      }
-      filenameMap.get(baseFilename).push(link);
-    });
-    
-    // Second pass: rename duplicates
-    filenameMap.forEach((linkGroup, baseFilename) => {
-      if (linkGroup.length > 1) {
-        linkGroup.forEach((link, index) => {
-          if (index === 0) {
-            // First occurrence keeps original name
-            return;
-          } else {
-            // Add suffix to duplicates
-            link.filename = `${baseFilename}-${index}`;
-            link.filenameWithExt = `${baseFilename}-${index}.${link.extension}`;
-          }
-        });
-      }
-    });
-    
-    return links;
-  }
-  
   async extractDocumentLinks(settings, pageUrl) {
     try {
-      const links = new Map();
+      const links = []; // Use array instead of Map to keep duplicates
       const { fileExtensions, linkSelectors, innerContent, makeAbsolute } = settings;
 
       // Create regex for file extensions
@@ -61,110 +28,132 @@ class ContentExtractor {
       // Process each selector type
       linkSelectors.forEach(selector => {
         try {
-       // Enhanced bad zone detection
-const badZoneSelectors = [
-  'header', 'footer', 'nav', 'aside',
-  '[role="banner"]', '[role="contentinfo"]', '[role="navigation"]', '[role="complementary"]',
-  '.site-header', '.site-footer', '.global-header', '.global-footer',
-  '.header', '.footer', '.navigation', '.nav', '.navbar', '.nav-bar',
-  '.site-nav', '.main-nav', '.primary-nav', '.secondary-nav',
-  '.breadcrumb', '.breadcrumbs', '.page-header', '.page-footer',
-  '.top-bar', '.bottom-bar', '.masthead', '.site-info',
-  '#header', '#footer', '#navigation', '#nav', '#navbar',
-  '#site-header', '#site-footer', '#main-nav', '#primary-nav',  
-  // Corporate website specific
-  '.footer', '.site-footer', '.page-footer', '.main-footer',
-  '.footer-section', '.footer-content', '.footer-wrapper',
-  '.footer-links', '.footer-nav', '.footer-menu',
-  
-  // More specific patterns
-  '[class*="footer"]', '[id*="footer"]',
-  '.legal-links', '.corporate-links', '.utility-links',
-];
-
-const badZones = document.querySelectorAll(badZoneSelectors.join(', '));
-
-const isInBadZone = (element) => {
-  // Check if element itself matches bad zone selectors
-  for (const selector of badZoneSelectors) {
-    try {
-      if (element.matches(selector)) return true;
-    } catch (e) {}
-  }
-  
-  // Check if ANY ancestor (at any depth) is a bad zone
-  let currentElement = element;
-  while (currentElement && currentElement !== document.body) {
-    // Check against all bad zone elements
-    for (const zone of badZones) {
-      if (zone === currentElement) {
-        return true;
-      }
-    }
-    
-    // Also check if current ancestor matches bad zone selectors
-    for (const selector of badZoneSelectors) {
-      try {
-        if (currentElement.matches(selector)) {
-          return true;
-        }
-      } catch (e) {}
-    }
-    
-    currentElement = currentElement.parentElement;
-  }
-  
-  return false;
-};
-          
-const elements = Array.from(document.querySelectorAll(selector))
-.filter(element => !isInBadZone(element));
-          
-          elements.forEach(element => {
-          
-            const href = element.getAttribute('href') || 
-                        element.getAttribute('data-href') || 
-                        element.getAttribute('data-download');
+          // Enhanced bad zone detection
+          const badZoneSelectors = [
+            'header', 'footer', 'nav', 'aside',
+            '[role="banner"]', '[role="contentinfo"]', '[role="navigation"]', '[role="complementary"]',
+            '.site-header', '.site-footer', '.global-header', '.global-footer',
+            '.header', '.footer', '.navigation', '.nav', '.navbar', '.nav-bar',
+            '.site-nav', '.main-nav', '.primary-nav', '.secondary-nav',
+            '.breadcrumb', '.breadcrumbs', '.page-header', '.page-footer',
+            '.top-bar', '.bottom-bar', '.masthead', '.site-info',
+            '#header', '#footer', '#navigation', '#nav', '#navbar',
+            '#site-header', '#site-footer', '#main-nav', '#primary-nav',  
+            // Corporate website specific
+            '.footer', '.site-footer', '.page-footer', '.main-footer',
+            '.footer-section', '.footer-content', '.footer-wrapper',
+            '.footer-links', '.footer-nav', '.footer-menu',
             
-            if (!href || href.startsWith('#') || href.startsWith('javascript:')) {
-              return;
-            }
+            // More specific patterns
+            '[class*="footer"]', '[id*="footer"]',
+            '.legal-links', '.corporate-links', '.utility-links',
+          ];
 
-            let finalUrl = href.trim();
+          const badZones = document.querySelectorAll(badZoneSelectors.join(', '));
+
+          const isInBadZone = (element) => {
+            // Check if element itself matches bad zone selectors
+            for (const selector of badZoneSelectors) {
+              try {
+                if (element.matches(selector)) return true;
+              } catch (e) {}
+            }
             
-            // Make absolute if needed
-            if (makeAbsolute) {
-              finalUrl = this.makeAbsoluteUrl(finalUrl, pageUrl);
-            }
-
-            // Check if it matches document extensions
-            if (extPattern.test(finalUrl)) {
-              let title = '';
-              
-              if (innerContent) {
-                title = (element.innerText || '').trim() ||
-                        this.extractElementText(element) ||
-                        element.getAttribute('title') ||
-                        element.getAttribute('aria-label') ||
-                        element.getAttribute('data-title') ||
-                        '';
+            // Check if ANY ancestor (at any depth) is a bad zone
+            let currentElement = element;
+            while (currentElement && currentElement !== document.body) {
+              // Check against all bad zone elements
+              for (const zone of badZones) {
+                if (zone === currentElement) {
+                  return true;
+                }
               }
               
+              // Also check if current ancestor matches bad zone selectors
+              for (const selector of badZoneSelectors) {
+                try {
+                  if (currentElement.matches(selector)) {
+                    return true;
+                  }
+                } catch (e) {}
+              }
+              
+              currentElement = currentElement.parentElement;
+            }
+            
+            return false;
+          };
+          
+          const elements = Array.from(document.querySelectorAll(selector))
+            .filter(element => !isInBadZone(element));
+          
+          console.log(`Processing selector "${selector}": found ${elements.length} elements`);
+          
+          elements.forEach((element, index) => {
+            try {
+              const href = element.getAttribute('href') || 
+                          element.getAttribute('data-href') || 
+                          element.getAttribute('data-download');
+              
+              if (!href || href.startsWith('#') || href.startsWith('javascript:')) {
+                return;
+              }
 
-              // Extract additional metadata
-              const metadata = this.extractLinkMetadata(element, finalUrl);
+              let finalUrl = href.trim();
+              
+              // Make absolute if needed
+              if (makeAbsolute) {
+                finalUrl = this.makeAbsoluteUrl(finalUrl, pageUrl);
+              }
 
-              links.set(finalUrl, {
-                url: finalUrl,
-                title: title.trim(),
-                filename: metadata.filename,
-                filenameWithExt: metadata.filenameWithExt,
-                extension: metadata.extension,
-                estimatedSize: metadata.estimatedSize,
-                tooltip: metadata.tooltip,
-                element: element.outerHTML.substring(0, 200) + '...', // For debugging
-                pageUrl: pageUrl
-              });
+              // Check if it matches document extensions
+              if (extPattern.test(finalUrl)) {
+                // Check for duplicates dynamically
+                const existingCount = links.filter(link => link.url === finalUrl).length;
+                if (existingCount > 0) {
+                  console.log(`Found duplicate ${existingCount + 1}:`, {
+                    url: finalUrl,
+                    element: element,
+                    selector: selector,
+                    index: index,
+                    totalLinksFound: links.length
+                  });
+                }
+
+                let title = '';
+                
+                if (innerContent) {
+                  title = (element.innerText || '').trim() ||
+                          this.extractElementText(element) ||
+                          element.getAttribute('title') ||
+                          element.getAttribute('aria-label') ||
+                          element.getAttribute('data-title') ||
+                          '';
+                }
+
+                // Extract additional metadata
+                const metadata = this.extractLinkMetadata(element, finalUrl);
+
+                links.push({
+                  url: finalUrl,
+                  title: title.trim(),
+                  filename: metadata.filename,
+                  filenameWithExt: metadata.filenameWithExt,
+                  extension: metadata.extension,
+                  estimatedSize: metadata.estimatedSize,
+                  tooltip: metadata.tooltip,
+                  element: element.outerHTML.substring(0, 200) + '...',
+                  pageUrl: pageUrl,
+                  uniqueId: Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+                  selectorUsed: selector,
+                  elementIndex: index
+                });
+
+                console.log(`Found link ${links.length}: ${finalUrl}`);
+              }
+            } catch (error) {
+              console.warn(`Error processing element ${index}:`, error, element);
+              // Don't return, continue to next element
             }
           });
         } catch (error) {
@@ -172,13 +161,23 @@ const elements = Array.from(document.querySelectorAll(selector))
         }
       });
 
-      const linkArray = Array.from(links.values());
-      const deduplicatedLinks = this.handleDuplicateFilenames(linkArray);
+      // Count all duplicates dynamically
+      const urlCounts = {};
+      links.forEach(link => {
+        urlCounts[link.url] = (urlCounts[link.url] || 0) + 1;
+      });
+
+      const duplicates = Object.entries(urlCounts).filter(([url, count]) => count > 1);
+      console.log(`Duplicates found:`, duplicates);
+      console.log(`Total links found: ${links.length}`);
+
       return {
         success: true,
-        links: deduplicatedLinks,
+        links: links,  // already an array with duplicates
         pageUrl: pageUrl,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        totalFound: links.length,
+        duplicateStats: duplicates
       };
 
     } catch (error) {
@@ -236,8 +235,6 @@ const elements = Array.from(document.querySelectorAll(selector))
   }
 
   extractFilename(pathname, element) {
-
-    
     // Try to get filename from various sources
     const contentDisposition = element.getAttribute('data-filename');
     if (contentDisposition) return contentDisposition;
@@ -404,7 +401,6 @@ const elements = Array.from(document.querySelectorAll(selector))
     }
   }
 
-  
   buildTooltip(extension, sizeBytes) {
     const kind = extension ? extension.toUpperCase() : 'FILE';
     const size = sizeBytes ? this.humanFileSize(sizeBytes) : 'size not available';
